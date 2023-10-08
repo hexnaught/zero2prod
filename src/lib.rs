@@ -3,7 +3,7 @@ use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use std::net::TcpListener;
 
 async fn health_check() -> impl Responder {
-    return HttpResponse::Ok();
+    HttpResponse::Ok()
 }
 
 pub fn run(listener: TcpListener) -> Result<Server, std::io::Error> {
@@ -11,5 +11,5 @@ pub fn run(listener: TcpListener) -> Result<Server, std::io::Error> {
         .listen(listener)?
         .run();
 
-    return Ok(server);
+    Ok(server)
 }
