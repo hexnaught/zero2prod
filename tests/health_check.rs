@@ -3,7 +3,7 @@ use std::net::TcpListener;
 fn spawn_app() -> String {
     let listener = TcpListener::bind("127.0.0.1:0").expect("failed to bind to a port");
     let port = listener.local_addr().unwrap().port();
-    let server = zero2prod::run(listener).expect("failed to bind address");
+    let server = zero2prod::startup::run(listener).expect("failed to bind address");
     // Launch the server as a background task, tokio::spawn returns a handle to
     // the spawned future, but we have no use for it, hence the non-binding let
     let _ = tokio::spawn(server);
