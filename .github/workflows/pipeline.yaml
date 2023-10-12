@@ -95,17 +95,12 @@ jobs:
   coverage:
     name: Generate Coverage Report
     runs-on: ubuntu-latest
-    container:
-      image: xd009642/tarpaulin
-      options: --security-opt seccomp=unconfined
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
 
       - name: Install the Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
 
       - name: Rust cache action
         uses: Swatinem/rust-cache@v2
