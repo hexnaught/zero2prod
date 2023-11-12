@@ -85,7 +85,13 @@ cargo install --version="~0.7" sqlx-cli --no-default-features --features rustls,
 ```
 
 ```sh
-sqlx --help
+cargo sqlx --help
+```
+
+### SQLX Prepare for 'Offline Mode'
+
+```sh
+cargo sqlx prepare --workspace
 ```
 
 ## Pipe to bunyan for better output
