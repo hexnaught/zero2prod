@@ -55,12 +55,12 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
 
     // Initialise our configuration reader, target yaml file as source and try deserialization
     let settings = config::Config::builder()
-        .add_source(
-            config::File::from(configuration_directory.join("base.yaml"))
-        )
-        .add_source(
-            config::File::from(configuration_directory.join(environment_filename))
-        )
+        .add_source(config::File::from(
+            configuration_directory.join("base.yaml"),
+        ))
+        .add_source(config::File::from(
+            configuration_directory.join(environment_filename),
+        ))
         .build()?;
     settings.try_deserialize::<Settings>()
 }
@@ -90,7 +90,7 @@ impl TryFrom<String> for Environment {
                 "{} is not a support environment. \
                 Use either `local` or `production`.",
                 other,
-            ))
+            )),
         }
     }
 }
