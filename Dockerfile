@@ -1,18 +1,23 @@
-FROM rust:1.73.0 AS base
-
+FROM lukemathwalker/cargo-chef:latest-rust-1.73.0 AS chef
 WORKDIR /app
-
 RUN apt update && apt install lld clang -y
 
+FROM chef AS planner
 COPY . .
+# Compute a lock-like file
+RUN cargo chef prepare --recipe-path recipe.json
 
+FROM chef as builder
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+
+COPY . .
 ENV SQLX_OFFLINE true
-RUN cargo build --locked --release
+RUN cargo build --release --bin zero2prod
 
 # TODO: Statically link stdlib to run on scratch image?
 # https://github.com/clux/muslrust
 FROM debian:bookworm-slim as runner
-
 WORKDIR /app
 
 # Install OpenSSL - it is dynamically linked by some of our dependencies
@@ -24,8 +29,7 @@ RUN apt-get update -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=base /app/target/release/zero2prod zero2prod
-
+COPY --from=builder /app/target/release/zero2prod zero2prod
 COPY configuration configuration
 ENV APP_ENVIRONMENT production
 
