@@ -1,4 +1,4 @@
-use crate::domain::{NewSubscriber, SubscriberName, SubscriberEmail};
+use crate::domain::{NewSubscriber, SubscriberEmail, SubscriberName};
 use actix_web::{web, HttpResponse, Responder};
 use chrono::Utc;
 use sqlx::PgPool;
