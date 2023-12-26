@@ -62,7 +62,7 @@ pub async fn send_confirmation_email(
     email_client: &EmailClient,
     new_subscriber: NewSubscriber,
 ) -> Result<(), reqwest::Error> {
-    let confirmation_link = "https://example.com/subsriptions/confirm";
+    let confirmation_link = "https://example.com/subscriptions/confirm";
     let html_body = format!(
         "Welcome to our newsletter!<br />\
         Click <a href=\"{}\">here</a> to confirm your subscription.",
