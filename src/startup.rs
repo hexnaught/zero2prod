@@ -8,32 +8,13 @@ use sqlx::PgPool;
 use std::net::TcpListener;
 use tracing_actix_web::TracingLogger;
 
+// Wrapper type so we can retrieve the base URL in the subscribe handler.
+// Retrieval via context with actix-web is type based, using a raw String would expose us to conflicts
+pub struct ApplicationBaseUrl(pub String);
+
 pub struct Application {
     port: u16,
     server: Server,
-}
-
-pub fn run(
-    listener: TcpListener,
-    db_pool: PgPool,
-    email_client: EmailClient,
-) -> Result<Server, std::io::Error> {
-    // Wrap the connection in a smart pointer (ARC)
-    let db_pool = web::Data::new(db_pool);
-    let email_client = web::Data::new(email_client);
-    // `move` captures the connection from the surrounding environment
-    let server = HttpServer::new(move || {
-        App::new()
-            .wrap(TracingLogger::default())
-            .route("/health_check", web::get().to(health_check))
-            .route("/subscriptions", web::post().to(subscribe))
-            .app_data(db_pool.clone()) // Clone the connection, as a new app is spawned per thread/core by actix
-            .app_data(email_client.clone())
-    })
-    .listen(listener)?
-    .run();
-
-    Ok(server)
 }
 
 impl Application {
@@ -59,7 +40,12 @@ impl Application {
         );
         let listener = TcpListener::bind(address)?;
         let port = listener.local_addr().unwrap().port();
-        let server = run(listener, connection_pool, email_client)?;
+        let server = run(
+            listener,
+            connection_pool,
+            email_client,
+            configuration.application.base_url,
+        )?;
 
         Ok(Self { port, server })
     }
@@ -71,6 +57,32 @@ impl Application {
     pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
         self.server.await
     }
+}
+
+pub fn run(
+    listener: TcpListener,
+    db_pool: PgPool,
+    email_client: EmailClient,
+    base_url: String,
+) -> Result<Server, std::io::Error> {
+    // Wrap the connection in a smart pointer (ARC)
+    let db_pool = web::Data::new(db_pool);
+    let email_client = web::Data::new(email_client);
+    let base_url = web::Data::new(ApplicationBaseUrl(base_url));
+    // `move` captures the connection from the surrounding environment
+    let server = HttpServer::new(move || {
+        App::new()
+            .wrap(TracingLogger::default())
+            .route("/health_check", web::get().to(health_check))
+            .route("/subscriptions", web::post().to(subscribe))
+            .app_data(db_pool.clone()) // Clone the connection, as a new app is spawned per thread/core by actix
+            .app_data(email_client.clone())
+            .app_data(base_url.clone())
+    })
+    .listen(listener)?
+    .run();
+
+    Ok(server)
 }
 
 pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {

@@ -23,6 +23,7 @@ services:
     routes:
       - path: /
     envs:
+      # Inject DB secrets at run time from database service in this spec
       - key: APP_DATABASE__USERNAME
         scope: RUN_TIME
         value: ${newsletter.USERNAME}
@@ -38,6 +39,10 @@ services:
       - key: APP_DATABASE__DATABASE_NAME
         scope: RUN_TIME
         value: ${newsletter.DATABASE}
+      # Inject application base URL, this is dynamically provisioned by digital ocean
+      - key: APP_APPLICATION__BASE_URL
+        scope: RUN_TIME
+        value: ${APP_URL}
 
 databases:
   - engine: PG
