@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS subscriptions
+    ADD COLUMN status TEXT NULL;
