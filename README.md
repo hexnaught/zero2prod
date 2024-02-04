@@ -142,3 +142,18 @@ docker run -p 8000:8000 zero2prod
 curl -v http://127.0.0.1:8000/health_check
 curl -i -X POST -d 'email=thomas_mann@hotmail.com&name=Tom' http://127.0.0.1:8000/subscriptions
 ```
+
+```sh
+docker container inspect --format '{{.State.Status}}' $CONTAINER_NAME != "running"
+```
+
+```
+Postmark Token
+5e3df6b6-3537-4d9f-b332-e7535a18352d
+```
+
+### Run Single Test
+
+```sh
+TEST_LOG=true RUST_LOG="sqlx=error,info" cargo t subscribe_fails_if_there_is_a_fatal_database_error | bunyan
+```
