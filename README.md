@@ -1,10 +1,14 @@
-# Project Setup
+# Zero 2 Prod Repo
 
-## Faster Linking
+This repo follows along with the rust book 'Zero to Production'. This readme will likely end up just being a dumping ground for notes and commands as I go, I may go back and clean it up in to an actual readme at some point in the future.
+
+## Project Setup
+
+### Faster Linking
 
 See `.cargo/config.toml`
 
-## Code Coverage
+### Code Coverage
 
 ```sh
 # Install tarpaulin utility/plugin
@@ -13,7 +17,7 @@ cargo install cargo-tarpaulin
 cargo tarpaulin --ignore-tests
 ```
 
-## Linting
+### Linting
 
 ```sh
 # Install the clippy for linting
@@ -24,7 +28,7 @@ cargo clippy
 cargo clippy -- -D warnings
 ```
 
-### Muting Clippy
+#### Muting Clippy
 
 Muting is done via directive on a per rule basis or can be done in `clippy.toml` or a project level.
 
@@ -35,7 +39,7 @@ Muting is done via directive on a per rule basis or can be done in `clippy.toml`
 #![allow(clippy::lint_name)]
 ```
 
-## Formatting
+### Formatting
 
 ```sh
 # Install rustfmt for formatting
@@ -45,9 +49,9 @@ cargo fmt
 cargo fmt -- --check
 ```
 
-## Security Scanning
+### Security Scanning
 
-### Cargo Audit
+#### Cargo Audit
 
 Cargo `audit` is a utility that scans the project dependencies against an advisory database looking for vulnerable dependencies.
 
@@ -58,7 +62,7 @@ cargo install cargo-audit
 cargo audit
 ```
 
-### Cargo Deny
+#### Cargo Deny
 
 Cargo `deny` is a utility for scanning dependencies for vulnerabilities, but it goes a step further allowing configuration of certain registries only, an allow/deny list of Crates, licence checks and more.
 
@@ -68,7 +72,7 @@ There is a `deny.toml` configuration file in the project root with more informat
 cargo install --locked cargo-deny && cargo deny init && cargo deny check
 ```
 
-## Expanding Macros
+### Expanding Macros
 
 Cargo `expand` shows the project source code with all of the macros used 'expanded' and prints that source code to the terminal, allowing us to see exactly what the macro is doing.
 
@@ -76,15 +80,15 @@ Cargo `expand` shows the project source code with all of the macros used 'expand
 cargo expand
 ```
 
-## Cargo un-used deps
+### Cargo un-used deps
 
 ```sh
 cargo +nightly udeps
 ```
 
-# Tooling
+## Tooling
 
-## sqlx-cli
+### sqlx-cli
 
 ```sh
 # Install sqlx cli tooling with Cargo
@@ -93,7 +97,7 @@ cargo install --version="~0.7" sqlx-cli --no-default-features --features rustls,
 cargo sqlx --help
 ```
 
-### SQLX Prepare for 'Offline Mode'
+#### SQLX Prepare for 'Offline Mode'
 
 This will generate a metadata file for `sqlx` to use with 'offline mode', allowing the app to build successfully without _having_ to connect to a database during the build step to verify queries.
 
@@ -103,7 +107,7 @@ Prepare does require the ability to connect to an actual postgres database.
 cargo sqlx prepare --workspace
 ```
 
-## Pipe to bunyan for better output
+### Bunyan - Better terminal output
 
 Bunyan allows easier formatting and reading of logs at the CLI.
 
@@ -112,19 +116,23 @@ Bunyan allows easier formatting and reading of logs at the CLI.
 # The original `bunyan` requires NPM, but you can install a Rust-port with
 # `cargo install bunyan`
 TEST_LOG=true cargo test health_check_works | bunyan
+
+TEST_LOG=true cargo t | bunyan
+
+TEST_LOG=true RUST_LOG="sqlx=error,info" cargo t subscribe_fails_if_there_is_a_fatal_database_error | bunyan
 ```
 
-# Running The App
+## Running The App
 
-## Configuration
+### Configuration
 
 [TODO: Configuration](#configuration)
 
-## Local Machine
+### Local Machine
 
 [TODO: Configuration.Local](#local-machine)
 
-## Docker
+### Docker
 
 You can build and run the app with the below Docker commands, for interacting with Postgres there must also be a Postgres database initialised and available with the connection information set up in the [Configuration](#configuration) step.
 
@@ -136,24 +144,9 @@ docker run -p 8000:8000 zero2prod
 ```
 
 <!-- https://blog.rust-lang.org/2018/05/10/Rust-1.26.html#impl-trait -->
-## Requests
+### Making API Requests
 
 ```sh
 curl -v http://127.0.0.1:8000/health_check
-curl -i -X POST -d 'email=thomas_mann@hotmail.com&name=Tom' http://127.0.0.1:8000/subscriptions
-```
-
-```sh
-docker container inspect --format '{{.State.Status}}' $CONTAINER_NAME != "running"
-```
-
-```
-Postmark Token
-5e3df6b6-3537-4d9f-b332-e7535a18352d
-```
-
-### Run Single Test
-
-```sh
-TEST_LOG=true RUST_LOG="sqlx=error,info" cargo t subscribe_fails_if_there_is_a_fatal_database_error | bunyan
+curl -i -X POST -d 'email=thomas_mann@example.com&name=Tom' http://127.0.0.1:8000/subscriptions
 ```
